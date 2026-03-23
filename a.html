@@ -1563,4 +1563,277 @@
   </footer>
 
 </body>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const $ = (selector, scope = document) => scope.querySelector(selector);
+    const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+
+    /* =========================
+       Mobile Navigation
+    ========================= */
+    const mobileToggle = $('#mobileToggle');
+    const mobileMenu = $('#mobileMenu');
+
+    if (mobileToggle && mobileMenu) {
+      mobileToggle.addEventListener('click', () => {
+        const isOpen = mobileMenu.classList.toggle('open');
+        mobileToggle.setAttribute('aria-expanded', String(isOpen));
+      });
+
+      $$('a', mobileMenu).forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.remove('open');
+          mobileToggle.setAttribute('aria-expanded', 'false');
+        });
+      });
+    }
+
+    /* =========================
+       Scroll Reveal Animation
+    ========================= */
+    const revealItems = $$('.fade-up');
+
+    if ('IntersectionObserver' in window) {
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        });
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      revealItems.forEach(item => revealObserver.observe(item));
+    } else {
+      revealItems.forEach(item => item.classList.add('in-view'));
+    }
+
+    /* =========================
+       Product Listing Filters
+    ========================= */
+    const productGrid = $('#productGrid');
+    const productCards = $$('.product-card', productGrid);
+    const categoryButtons = $$('#categoryFilters .chip');
+    const collectionButtons = $$('#collectionFilters .chip');
+
+    let activeCategory = 'all';
+    let activeCollection = 'all';
+
+    function updateActiveState(buttons, selectedButton) {
+      buttons.forEach(btn => btn.classList.remove('active'));
+      if (selectedButton) selectedButton.classList.add('active');
+    }
+
+    function filterProducts() {
+      productCards.forEach(card => {
+        const matchesCategory =
+          activeCategory === 'all' || card.dataset.category === activeCategory;
+        const matchesCollection =
+          activeCollection === 'all' || card.dataset.collection === activeCollection;
+
+        const shouldShow = matchesCategory && matchesCollection;
+        card.style.display = shouldShow ? '' : 'none';
+      });
+    }
+
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        activeCategory = button.dataset.category;
+        updateActiveState(categoryButtons, button);
+        filterProducts();
+      });
+    });
+
+    collectionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        activeCollection = button.dataset.collection;
+        updateActiveState(collectionButtons, button);
+        filterProducts();
+      });
+    });
+
+    /* =========================
+       Generic Toggle Pills
+    ========================= */
+    function makeSingleSelect(groupSelector, itemSelector, activeClass = 'active') {
+      const groups = $$(groupSelector);
+      groups.forEach(group => {
+        const items = $$(itemSelector, group);
+        items.forEach(item => {
+          item.addEventListener('click', () => {
+            items.forEach(el => el.classList.remove(activeClass));
+            item.classList.add(activeClass);
+          });
+        });
+      });
+    }
+
+    function makeMultiSelect(selector, activeClass = 'active') {
+      $$(selector).forEach(item => {
+        item.addEventListener('click', () => {
+          item.classList.toggle(activeClass);
+        });
+      });
+    }
+
+    makeMultiSelect('.filters .size-pill');
+    makeSingleSelect('#pdpSizes', '.size-pill');
+    makeSingleSelect('#swatches', '.swatch');
+
+    /* =========================
+       Category Cards -> Apply Filter
+    ========================= */
+    const categoryCards = $$('.category-card');
+    categoryCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const filter = card.dataset.filter;
+        const targetButton = $(`#categoryFilters .chip[data-category="${filter}"]`);
+        if (targetButton) {
+          activeCategory = filter;
+          updateActiveState(categoryButtons, targetButton);
+          filterProducts();
+        }
+      });
+    });
+
+    /* =========================
+       PDP Gallery Thumbnails
+    ========================= */
+    const mainProductImage = $('#mainProductImage');
+    const thumbs = $$('.thumb', $('#thumbs'));
+
+    thumbs.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        thumbs.forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+
+        const newImage = thumb.dataset.image;
+        const thumbImg = $('img', thumb);
+
+        if (mainProductImage && newImage) {
+          mainProductImage.src = newImage;
+          mainProductImage.alt = thumbImg ? thumbImg.alt : 'Selected product image';
+        }
+      });
+    });
+
+    /* =========================
+       Product Cards -> Populate PDP
+    ========================= */
+    const pdpSection = $('#product');
+    const pdpCategory = $('.pdp-category');
+    const pdpTitle = $('.pdp-title');
+    const pdpPrice = $('.pdp-price');
+    const pdpDescription = $('.pdp-description');
+
+    const productDescriptions = {
+      'Sculpted Wool Coat':
+        'A sharply composed coat cut from a dense wool blend with a clean drape, precise shoulders, and a belt detail that adds structure without excess. Designed to sit between timeless and directional.',
+      'Tailored Overcoat':
+        'An architectural overcoat designed for a refined silhouette, finished with clean lines, soft structure, and understated luxury for everyday wear.',
+      'Soft Cotton Set':
+        'A premium kidswear set crafted for comfort and polish, balancing soft fabrication with elevated finishing for an effortless daily uniform.',
+      'Column Silk Dress':
+        'A fluid evening silhouette with a long, elegant line and quiet drama — designed to move beautifully and photograph with depth.',
+      'Merino Zip Knit':
+        'A fine-gauge merino knit with a clean zip collar and elevated hand feel, built for transitional dressing with minimal effort.',
+      'Mini Statement Jacket':
+        'A polished outer layer for kids, designed with a clean shape, soft finish, and elevated proportions that feel playful yet refined.'
+    };
+
+    productCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const name = $('.product-name', card)?.textContent?.trim() || 'Product';
+        const price = $('.product-price', card)?.textContent?.trim() || '';
+        const meta = $('.product-meta', card)?.textContent?.trim() || '';
+        const image = $('.product-media img', card)?.getAttribute('src') || '';
+
+        if (pdpTitle) pdpTitle.textContent = name;
+        if (pdpPrice) pdpPrice.textContent = price;
+        if (pdpCategory) pdpCategory.textContent = meta;
+        if (pdpDescription) {
+          pdpDescription.textContent =
+            productDescriptions[name] ||
+            'A refined fashion piece presented with premium materials, modern proportions, and an elevated finish.';
+        }
+
+        if (mainProductImage && image) {
+          mainProductImage.src = image;
+          mainProductImage.alt = name;
+        }
+
+        if (thumbs.length && image) {
+          thumbs.forEach((thumb, index) => {
+            thumb.classList.remove('active');
+            if (index === 0) {
+              thumb.classList.add('active');
+              thumb.dataset.image = image;
+              const thumbImg = $('img', thumb);
+              if (thumbImg) {
+                thumbImg.src = image;
+                thumbImg.alt = name;
+              }
+            }
+          });
+        }
+
+        if (pdpSection) {
+          pdpSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    /* =========================
+       PDP Accordions
+    ========================= */
+    const accordions = $$('.accordion');
+
+    accordions.forEach(accordion => {
+      const button = $('button', accordion);
+      const symbol = $('span', button);
+
+      button.addEventListener('click', () => {
+        const isOpen = accordion.classList.contains('open');
+
+        accordions.forEach(item => {
+          item.classList.remove('open');
+          const itemButton = $('button', item);
+          const itemSymbol = $('span', itemButton);
+          if (itemSymbol) itemSymbol.textContent = '+';
+        });
+
+        if (!isOpen) {
+          accordion.classList.add('open');
+          if (symbol) symbol.textContent = '−';
+        }
+      });
+    });
+
+    /* =========================
+       Smooth anchor offset polish
+    ========================= */
+    $$('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', event => {
+        const href = link.getAttribute('href');
+        if (!href || href === '#') return;
+
+        const target = document.querySelector(href);
+        if (!target) return;
+
+        event.preventDefault();
+
+        const headerOffset = document.querySelector('.site-header')?.offsetHeight || 0;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset + 2;
+
+        window.scrollTo({
+          top,
+          behavior: 'smooth'
+        });
+      });
+    });
+  });
+</script>
 </html>
