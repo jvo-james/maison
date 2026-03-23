@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (navToggle && mobileMenu) {
     navToggle.addEventListener("click", () => {
-      mobileMenu.classList.toggle("active");
+      const isActive = mobileMenu.classList.toggle("active");
+      navToggle.setAttribute("aria-expanded", isActive ? "true" : "false");
     });
   }
 
@@ -79,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const input = newsletterForm.querySelector("input");
 
-      if (input.value.trim() === "") {
+      if (!input.value.trim()) {
         input.focus();
         return;
       }
