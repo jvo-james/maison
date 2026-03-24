@@ -2598,3 +2598,83 @@ body[data-page="home"] .navbar .cart-count {
     font-size: 0.88rem;
   }
 }
+/* Index page header utility icons white */
+body[data-page="home"] .navbar .nav-icon-btn,
+body[data-page="home"] .navbar .nav-toggle {
+  color: #fff;
+}
+
+body[data-page="home"] .navbar .nav-toggle span {
+  background: #fff;
+}
+
+body[data-page="home"] .navbar .nav-icon-btn i {
+  color: #fff;
+}
+
+body[data-page="home"] .navbar .cart-count {
+  background: #fff;
+  color: #111;
+}
+
+/* Tighter mobile footer */
+@media (max-width: 640px) {
+  .footer {
+    padding: 36px 0 20px;
+  }
+
+  .footer-grid {
+    gap: 12px;
+  }
+
+  .footer-grid > div:first-child {
+    margin-bottom: 2px;
+  }
+
+  .footer-grid > div:not(:first-child) {
+    padding-top: 8px;
+    gap: 10px;
+  }
+
+  .footer h4 {
+    padding-top: 1px;
+    line-height: 1.1;
+  }
+
+  .footer a {
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .footer-copy {
+    margin-top: 0;
+    line-height: 1.45;
+  }
+
+  .footer-brand {
+    margin-bottom: 6px;
+  }
+}
+
+@media (max-width: 420px) {
+  .footer {
+    padding: 30px 0 16px;
+  }
+
+  .footer-grid {
+    gap: 10px;
+  }
+
+  .footer-grid > div:not(:first-child) {
+    padding-top: 6px;
+  }
+
+  .footer a {
+    margin-bottom: 5px;
+    font-size: 0.84rem;
+  }
+
+  .footer-copy {
+    font-size: 0.88rem;
+  }
+}
